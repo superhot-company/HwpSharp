@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HwpSharp.Common", "HwpSharp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C008152B-E6A5-4E34-8C66-805291E72861}"
 	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
@@ -19,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HwpSharp.Hwp5", "HwpSharp.H
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HwpSharp", "HwpSharp\HwpSharp.csproj", "{8C058F0D-B229-4D84-B863-5D0D6355AC2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HwpSharp.Test", "HwpSharp.Test\HwpSharp.Test.csproj", "{093531CF-5480-4508-8364-1C2931B878FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +42,10 @@ Global
 		{8C058F0D-B229-4D84-B863-5D0D6355AC2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C058F0D-B229-4D84-B863-5D0D6355AC2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C058F0D-B229-4D84-B863-5D0D6355AC2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{093531CF-5480-4508-8364-1C2931B878FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{093531CF-5480-4508-8364-1C2931B878FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{093531CF-5480-4508-8364-1C2931B878FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{093531CF-5480-4508-8364-1C2931B878FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
