@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SuperHot.HwpSharp.Hwp5</RootNamespace>
+    <AssemblyName>SuperHot.HwpSharp.Hwp5</AssemblyName>
+    <Authors>SuperHot</Authors>
+    <Company>SuperHot</Company>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\bin</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenMcdf" Version="2.2.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HwpSharp.Common\HwpSharp.Common.csproj" />
+  </ItemGroup>
+
+</Project>

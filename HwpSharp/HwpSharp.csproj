@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SuperHot.HwpSharp</RootNamespace>
+    <AssemblyName>SuperHot.HwpSharp</AssemblyName>
+    <Authors>SuperHot</Authors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\bin</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HwpSharp.Common\HwpSharp.Common.csproj" />
+    <ProjectReference Include="..\HwpSharp.Hwp5\HwpSharp.Hwp5.csproj" />
+  </ItemGroup>
+
+</Project>
