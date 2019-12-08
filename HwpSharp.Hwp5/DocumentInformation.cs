@@ -17,6 +17,8 @@ namespace SuperHot.HwpSharp.Hwp5
 
         public IdMapping IdMappings { get; }
 
+        public IList<BinData> BinDataList { get; }
+
         /// <summary>
         /// Creates a blank <see cref="DocumentInformation"/> instance with specified file header.
         /// </summary>
@@ -31,6 +33,7 @@ namespace SuperHot.HwpSharp.Hwp5
         {
             _fileHeader = fileHeader;
             DataRecords = new List<DataRecord>();
+            BinDataList = new List<BinData>();
 
             using(var recordReader = new HwpDataRecordReader(reader, fileHeader))
             {
@@ -62,6 +65,11 @@ namespace SuperHot.HwpSharp.Hwp5
                                 {
                                     throw new HwpCorruptedDocumentInformationException("Duplicated IdMapping");
                                 }
+                            }
+                            break;
+                        case (uint)TagEnum.BinData:
+                            {
+                                BinDataList.Add((BinData)record);
                             }
                             break;
                     }

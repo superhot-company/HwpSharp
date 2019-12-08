@@ -9,7 +9,7 @@ namespace SuperHot.HwpSharp.Test.Hwp5
     public class DocumentTest
     {
         [Theory]
-        [InlineData(@"../../../case/CompoundFile.xls", typeof(HwpFileFormatException), "Specified document does not have a FileHeader field.")]
+        [InlineData(@"../../../case/CompoundFile.xls", typeof(HwpFileFormatException), "Specified document does not have a FileHeader stream.")]
         [InlineData(@"../../../case/Hwp3File.hwp", typeof(HwpFileFormatException), "Specified document is not a hwp 5 document format.")]
         [InlineData(@"../../../case/PdfFile.pdf", typeof(HwpFileFormatException), "Specified document is not a hwp 5 document format.")]
         [InlineData(null, typeof(ArgumentNullException), "Value cannot be null.")]
@@ -26,7 +26,7 @@ namespace SuperHot.HwpSharp.Test.Hwp5
         }
 
         [Theory]
-        [InlineData(@"../../../case/CompoundFile.xls", typeof(HwpFileFormatException), "Specified document does not have a FileHeader field.")]
+        [InlineData(@"../../../case/CompoundFile.xls", typeof(HwpFileFormatException), "Specified document does not have a FileHeader stream.")]
         [InlineData(@"../../../case/Hwp3File.hwp", typeof(HwpFileFormatException), "Specified document is not a hwp 5 document format.")]
         [InlineData(@"../../../case/PdfFile.pdf", typeof(HwpFileFormatException), "Specified document is not a hwp 5 document format.")]
         [InlineData(null, typeof(ArgumentNullException), "Value cannot be null.")]

@@ -12,7 +12,7 @@ namespace SuperHot.HwpSharp.Test.Hwp5
         [InlineData(@"../../../case/Hwp5/[CP]manual.hwp", "5.0.5.0")]
         public void ReadDistributionFile(string filename, string version)
         {
-            var document = new Document(@"..\case\" + filename);
+            var document = new Document(filename);
             Assert.Equal(version, document.FileHeader.FileVersion.ToString());
             Assert.Equal(true, document.FileHeader.Published);
         }

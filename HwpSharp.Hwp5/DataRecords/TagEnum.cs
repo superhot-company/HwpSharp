@@ -14,7 +14,7 @@
         /// </summary>
         DocumentProperties = DataRecord.HwpTagBegin,
         IdMappings = DataRecord.HwpTagBegin + 1,
-        BinDate = DataRecord.HwpTagBegin + 2,
+        BinData = DataRecord.HwpTagBegin + 2,
         FaceName = DataRecord.HwpTagBegin + 3,
         BorderFill = DataRecord.HwpTagBegin + 4,
         CharShape = DataRecord.HwpTagBegin + 5,

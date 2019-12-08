@@ -1,9 +1,14 @@
-﻿namespace SuperHot.HwpSharp.Hwp5
+﻿using System.Collections.Generic;
+
+namespace SuperHot.HwpSharp.Hwp5
 {
     public class DocumentOption
     {
-        // _LinkDoc
-        // DrmLicense
-        // ...
+        public IDictionary<string, byte[]> Streams { get; set; }
+
+        public DocumentOption()
+        {
+            Streams = new Dictionary<string, byte[]>();
+        }
     }
 }
