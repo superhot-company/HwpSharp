@@ -135,18 +135,11 @@ namespace SuperHot.HwpSharp.Common.HwpType
         public byte Green { get; }
         public byte Blue { get; }
 
-        private Color(uint value)
+        public Color(byte red, byte green, byte blue)
         {
-            Red = (byte) (value & 0xff);
-            Green = (byte) ((value >> 8) & 0xff);
-            Blue = (byte) ((value >> 16) & 0xff);
-        }
-
-        public Color(byte r, byte g, byte b)
-        {
-            Red = r;
-            Green = g;
-            Blue = b;
+            Red = red;
+            Green = green;
+            Blue = blue;
         }
 
         /// <summary>
@@ -156,7 +149,10 @@ namespace SuperHot.HwpSharp.Common.HwpType
         /// <returns>A new <see cref="Color" /> with the specified value.</returns>
         public static implicit operator Color(uint value)
         {
-            return new Color(value);
+            byte red = (byte)(value & 0xff);
+            byte green = (byte)((value >> 8) & 0xff);
+            byte blue = (byte)((value >> 16) & 0xff);
+            return new Color(red, green, blue);
         }
 
         /// <summary>
