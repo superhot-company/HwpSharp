@@ -113,6 +113,23 @@ namespace SuperHot.HwpSharp.Common
         }
     }
 
+    public class HwpCorruptedFileHeaderException : HwpCorruptedException
+    {
+        public HwpCorruptedFileHeaderException()
+        {
+        }
+
+        public HwpCorruptedFileHeaderException(string message)
+            : base(message)
+        {
+        }
+
+        public HwpCorruptedFileHeaderException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
     /// <summary>
     /// The exception that is thrown when hwpSharp read a corrupted data record from stream.
     /// </summary>

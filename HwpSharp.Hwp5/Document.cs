@@ -5,6 +5,7 @@ using SuperHot.HwpSharp.Hwp5.BodyText;
 using OpenMcdf;
 using SuperHot.HwpSharp.Common;
 using SuperHot.HwpSharp.Hwp5.DoucmentOption;
+using SuperHot.HwpSharp.Hwp5.HwpType;
 
 namespace SuperHot.HwpSharp.Hwp5
 {
@@ -193,18 +194,27 @@ namespace SuperHot.HwpSharp.Hwp5
         private static FileHeader LoadFileHeader(CompoundFile compoundFile)
         {
             CFStream stream;
+            byte[] data;
             try
             {
                 stream = compoundFile.RootStorage.GetStream("FileHeader");
+                data = stream.GetData();
             }
             catch (CFItemNotFound exception)
             {
                 throw new HwpFileFormatException("Specified document does not have a FileHeader field.", exception);
             }
 
-            var fileHeader = new FileHeader(stream);
+            if (data.Length != FileHeader.FIleHeaderLength)
+            {
+                throw new HwpFileFormatException("The length of a file header is not 256.");
+            }
 
-            return fileHeader;
+            using (var reader = new HwpReader(data)) {
+                var fileHeader = new FileHeader(reader);
+
+                return fileHeader;
+            }
         }
 
         /// <summary>

@@ -37,5 +37,19 @@ namespace SuperHot.HwpSharp.Test.Hwp5
 
             Assert.Equal(expected, document.FileHeader.FileVersion.ToString());
         }
+
+        [Theory]
+        [InlineData(@"../../../case/Hwp5/ccl_trackchange.hwp", true, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false)]
+        [InlineData(@"../../../case/Hwp5/distribution.hwp", true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false)]
+        public void Attribute_Hwp5Dcoument(string filename, bool compressed, bool encrypted, bool distribute, bool script, bool drm, bool xml, bool history, bool sign, bool certificate, bool reservedCertificate, bool certificateDrm, bool ccl, bool mobileOptimized, bool personalinformation, bool trackchange, bool kogl, bool video, bool index)
+        {
+            var document = new Document(filename);
+
+            Assert.Equal(compressed, document.FileHeader.Compressed);
+            Assert.Equal(encrypted, document.FileHeader.PasswordEncrypted);
+            Assert.Equal(distribute, document.FileHeader.Published);
+            Assert.Equal(ccl, document.FileHeader.CclDocumented);
+            Assert.Equal(trackchange, document.FileHeader.TrackChange);
+        }
     }
 }
