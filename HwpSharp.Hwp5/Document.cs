@@ -4,6 +4,7 @@ using System.IO.Compression;
 using SuperHot.HwpSharp.Hwp5.BodyText;
 using OpenMcdf;
 using SuperHot.HwpSharp.Common;
+using SuperHot.HwpSharp.Hwp5.DoucmentOption;
 
 namespace SuperHot.HwpSharp.Hwp5
 {
@@ -39,6 +40,108 @@ namespace SuperHot.HwpSharp.Hwp5
         {
             get { throw new NotImplementedException(); }
             private set { throw new NotImplementedException(); }
+        }
+
+        public BinaryData.BinaryData BinaryData
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets a preview text.
+        /// </summary>
+        public PreviewText PreviewText
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets a preview image.
+        /// </summary>
+        public PreviewImage PreviewImage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets document options
+        /// </summary>
+        public DocumentOption DocumentOption
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets scripts
+        /// </summary>
+        public Script.Script Script
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets XML Templates
+        /// </summary>
+        public XmlTemplate.XmlTemplate XmlTemplate
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets a document history
+        /// </summary>
+        public DocumentHistory.DocumentHistory DocumentHistory
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal Document(CompoundFile compoundFile)
