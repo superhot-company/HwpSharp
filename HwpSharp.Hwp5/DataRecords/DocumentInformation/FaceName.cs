@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text;
-using SuperHot.HwpSharp.Hwp5.HwpType;
 using SuperHot.HwpSharp.Common;
-using SuperHot.HwpSharp.Common.HwpType;
 
-namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
+namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
     public class FaceName : DataRecord
     {
@@ -238,7 +234,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (!Property.HasFlag(FontProperty.AlternativeFont))
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _alternativeFontType;
             }
@@ -252,7 +248,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (!Property.HasFlag(FontProperty.AlternativeFont))
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _alternativeFontName;
             }
@@ -266,7 +262,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (!Property.HasFlag(FontProperty.FaceStyle))
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _faceStyle;
             }
@@ -280,88 +276,49 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (!Property.HasFlag(FontProperty.DefaultFont))
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _defaultFontName;
             }
         }
 
-        public FaceName(uint level, byte[] bytes, DocumentInformation _ = null)
-            : base(FaceNameTagId, level, (uint) bytes.Length)
+        public FaceName(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
+            : base(FaceNameTagId, level, (uint) bytes.Length, bytes)
         {
-            var pos = 0;
-
-            FontProperty property;
-            Property = Enum.TryParse($"{bytes[pos]}", out property) ? property : FontProperty.Unknown;
-            pos += 1;
-
-            var nameLength = bytes.ToWord(pos);
-            pos += 2;
-
-            FontName = Encoding.Unicode.GetString(bytes, pos, 2*nameLength);
-            pos += 2*nameLength;
-
-            if (property.HasFlag(FontProperty.AlternativeFont))
+            using (var reader = new HwpReader(bytes))
             {
-                AlternativeFont alternative;
-                _alternativeFontType = Enum.TryParse($"{bytes[pos]}", out alternative)
-                    ? alternative
-                    : AlternativeFont.Unknown;
-                pos += 1;
+                Property = Enum.TryParse($"{reader.ReadByte()}", out FontProperty property) ? property : FontProperty.Unknown;
 
-                var alternativeLength = bytes.ToWord(pos);
-                pos += 2;
+                var nameLength = reader.ReadUInt16();
+                FontName = reader.ReadString(nameLength);
 
-                _alternativeFontName = Encoding.Unicode.GetString(bytes, pos, 2*alternativeLength);
-                pos += 2*alternativeLength;
-            }
+                if (Property.HasFlag(FontProperty.AlternativeFont))
+                {
+                    _alternativeFontType = Enum.TryParse($"{reader.ReadByte()}", out AlternativeFont alternative) ? alternative : AlternativeFont.Unknown;
+                    var alternativeFontNameLength = reader.ReadUInt16();
+                    _alternativeFontName = reader.ReadString(alternativeFontNameLength);
+                }
 
-            if (property.HasFlag(FontProperty.FaceStyle))
-            {
+                if (Property.HasFlag(FontProperty.FaceStyle))
+                {
+                    FaceStyle.FamilyType familyType = Enum.TryParse($"{reader.ReadByte()}", out familyType) ? familyType : FaceStyle.FamilyType.Any;
+                    FaceStyle.SerifStyle serifStyle = Enum.TryParse($"{reader.ReadByte()}", out serifStyle) ? serifStyle : FaceStyle.SerifStyle.Any;
+                    FaceStyle.Weight weight = Enum.TryParse($"{reader.ReadByte()}", out weight) ? weight : FaceStyle.Weight.Any;
+                    FaceStyle.Proportion proportion = Enum.TryParse($"{reader.ReadByte()}", out proportion) ? proportion : FaceStyle.Proportion.Any;
+                    FaceStyle.Contrast contrast = Enum.TryParse($"{reader.ReadByte()}", out contrast) ? contrast : FaceStyle.Contrast.Any;
+                    FaceStyle.StrokeVariation strokeVariation = Enum.TryParse($"{reader.ReadByte()}", out strokeVariation) ? strokeVariation : FaceStyle.StrokeVariation.Any;
+                    FaceStyle.ArmStyle armStyle = Enum.TryParse($"{reader.ReadByte()}", out armStyle) ? armStyle : FaceStyle.ArmStyle.Any;
+                    FaceStyle.LetterForm letterForm = Enum.TryParse($"{reader.ReadByte()}", out letterForm) ? letterForm : FaceStyle.LetterForm.Any;
+                    FaceStyle.MiddleLine middleLine = Enum.TryParse($"{reader.ReadByte()}", out middleLine) ? middleLine : FaceStyle.MiddleLine.Any;
+                    FaceStyle.XHeight xHeight = Enum.TryParse($"{reader.ReadByte()}", out xHeight) ? xHeight : FaceStyle.XHeight.Any;
+                    _faceStyle = new FaceStyle(familyType, serifStyle, weight, proportion, contrast, strokeVariation, armStyle, letterForm, middleLine, xHeight);
+                }
 
-                FaceStyle.FamilyType familyType;
-                familyType = Enum.TryParse($"{bytes[pos++]}", out familyType) ? familyType : FaceStyle.FamilyType.Any;
-
-                FaceStyle.SerifStyle serifStyle;
-                serifStyle = Enum.TryParse($"{bytes[pos++]}", out serifStyle) ? serifStyle : FaceStyle.SerifStyle.Any;
-
-                FaceStyle.Weight weight;
-                weight = Enum.TryParse($"{bytes[pos++]}", out weight) ? weight : FaceStyle.Weight.Any;
-
-                FaceStyle.Proportion proportion;
-                proportion = Enum.TryParse($"{bytes[pos++]}", out proportion) ? proportion : FaceStyle.Proportion.Any;
-
-                FaceStyle.Contrast contrast;
-                contrast = Enum.TryParse($"{bytes[pos++]}", out contrast) ? contrast : FaceStyle.Contrast.Any;
-
-                FaceStyle.StrokeVariation strokeVariation;
-                strokeVariation = Enum.TryParse($"{bytes[pos++]}", out strokeVariation)
-                    ? strokeVariation
-                    : FaceStyle.StrokeVariation.Any;
-
-                FaceStyle.ArmStyle armStyle;
-                armStyle = Enum.TryParse($"{bytes[pos++]}", out armStyle) ? armStyle : FaceStyle.ArmStyle.Any;
-
-                FaceStyle.LetterForm letterForm;
-                letterForm = Enum.TryParse($"{bytes[pos++]}", out letterForm) ? letterForm : FaceStyle.LetterForm.Any;
-
-                FaceStyle.MiddleLine middleLine;
-                middleLine = Enum.TryParse($"{bytes[pos++]}", out middleLine) ? middleLine : FaceStyle.MiddleLine.Any;
-
-                FaceStyle.XHeight xHeight;
-                xHeight = Enum.TryParse($"{bytes[pos++]}", out xHeight) ? xHeight : FaceStyle.XHeight.Any;
-
-                _faceStyle = new FaceStyle(familyType, serifStyle, weight, proportion, contrast, strokeVariation,
-                    armStyle, letterForm, middleLine, xHeight);
-            }
-
-            if (property.HasFlag(FontProperty.DefaultFont))
-            {
-                var defaultLength = bytes.ToWord(pos);
-                pos += 2;
-
-                _defaultFontName = Encoding.Unicode.GetString(bytes, pos, 2*defaultLength);
-                pos += 2*defaultLength;
+                if (Property.HasFlag(FontProperty.DefaultFont))
+                {
+                    var defaultFontNameLength = reader.ReadUInt16();
+                    _defaultFontName = reader.ReadString(defaultFontNameLength);
+                }
             }
         }
     }

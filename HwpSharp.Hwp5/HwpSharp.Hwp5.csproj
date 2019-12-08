@@ -20,4 +20,11 @@
     <ProjectReference Include="..\HwpSharp.Common\HwpSharp.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DocumentHistory\" />
+    <Folder Include="DocumentOption\" />
+    <Folder Include="Script\" />
+    <Folder Include="XmlTemplate\" />
+  </ItemGroup>
+
 </Project>

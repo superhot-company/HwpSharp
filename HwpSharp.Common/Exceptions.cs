@@ -130,6 +130,23 @@ namespace SuperHot.HwpSharp.Common
         }
     }
 
+    public class HwpCorruptedDocumentInformationException : HwpCorruptedException
+    {
+        public HwpCorruptedDocumentInformationException()
+        {
+        }
+
+        public HwpCorruptedDocumentInformationException(string message)
+            : base(message)
+        {
+        }
+
+        public HwpCorruptedDocumentInformationException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
     /// <summary>
     /// The exception that is thrown when hwpSharp read a corrupted data record from stream.
     /// </summary>
@@ -198,7 +215,7 @@ namespace SuperHot.HwpSharp.Common
     {
     }
 
-    public class HwpUnsupportedProperty : HwpException
+    public class HwpUnsupportedPropertyException : HwpException
     {
     }
 }

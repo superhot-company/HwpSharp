@@ -1,4 +1,4 @@
-﻿namespace SuperHot.HwpSharp.Hwp5.BinaryData
+﻿namespace SuperHot.HwpSharp.Hwp5
 {
     public class BinaryData
     {

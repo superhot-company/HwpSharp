@@ -1,5 +1,4 @@
-﻿using SuperHot.HwpSharp.Common.HwpType;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 namespace SuperHot.HwpSharp.Common

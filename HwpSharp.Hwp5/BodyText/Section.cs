@@ -1,31 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SuperHot.HwpSharp.Hwp5.BodyText.DataRecords;
-using SuperHot.HwpSharp.Hwp5.HwpType;
+﻿using System.Collections.Generic;
 using OpenMcdf;
+using SuperHot.HwpSharp.Hwp5.DataRecords;
 
-namespace SuperHot.HwpSharp.Hwp5.BodyText
+namespace SuperHot.HwpSharp.Hwp5
 {
-    public class Section
+    public partial class BodyText
     {
-        public DocumentInformation.DocumentInformation DocumentInformation { get; private set; }
-        
-        public List<DataRecord> DataRecords { get; }
-
-        public Section(DocumentInformation.DocumentInformation docInfo)
+        public class Section
         {
-            DocumentInformation = docInfo;
-            DataRecords = new List<DataRecord>();
-        }
+            private readonly FileHeader _fileHeader;
+            private readonly DocumentInformation _docInfo;
 
-        internal Section(CFStream stream, DocumentInformation.DocumentInformation docInfo)
-        {
-            DocumentInformation = docInfo;
+            public List<DataRecord> DataRecords { get; }
 
-            var bytes = Document.GetRawBytesFromStream(stream, docInfo.FileHeader);
-            DataRecords = new List<DataRecord>(DataRecord.GetRecordsFromBytes(bytes, docInfo));
+            public Section(FileHeader fileHeader, DocumentInformation docInfo)
+            {
+                _fileHeader = fileHeader;
+                _docInfo = docInfo;
+                DataRecords = new List<DataRecord>();
+            }
+
+            public Section(HwpReader reader, FileHeader fileHeader, DocumentInformation docInfo)
+            {
+                _fileHeader = fileHeader;
+                _docInfo = docInfo;
+                DataRecords = new List<DataRecord>();
+
+                using (var recordReader = new HwpDataRecordReader(reader, fileHeader, docInfo))
+                {
+                    while (!recordReader.IsEndOfStream())
+                    {
+                        var record = recordReader.ReadDataRecord();
+                        DataRecords.Add(record);
+                    }
+                }
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿namespace SuperHot.HwpSharp.Hwp5.HwpType
+﻿namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
     /// <summary>
     /// Specifies a tag ID of a hwp 5 data record.
     /// </summary>
-    public enum TagEnum
+    public enum TagEnum : uint
     {
-        Unknown = -1,
+        Unknown = 0xFFFFFFFF,
 
         #region DocInfo
 

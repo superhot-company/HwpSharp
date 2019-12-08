@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
-using SuperHot.HwpSharp.Hwp5.HwpType;
 using SuperHot.HwpSharp.Common;
 using SuperHot.HwpSharp.Common.HwpType;
 
-namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
+namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
     public class BorderFill : DataRecord
     {
@@ -183,7 +181,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
                 Color = color;
             }
 
-            public Border(LineType type = LineType.Solid, Weight weight = Weight.Mm0_1, Color color = default(Color))
+            public Border(LineType type = LineType.Solid, Weight weight = Weight.Mm0_1, Color color = default)
             {
                 Type = type;
                 Weight = weight;
@@ -312,43 +310,39 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
 
                 public IList<GradationColor> Colors { get; }
 
-                internal GradationFill(byte[] bytes, int pos = 0)
+                internal GradationFill(byte[] bytes)
                 {
-                    GradationType type;
-                    Type = Enum.TryParse($"{bytes.ToInt16(pos)}", out type) ? type : GradationType.None;
-                    pos += 2;
-
-                    Degree = bytes.ToInt16(pos);
-                    pos += 2;
-
-                    CenterX = bytes.ToInt16(pos);
-                    pos += 2;
-
-                    CenterY = bytes.ToInt16(pos);
-                    pos += 2;
-
-                    Blur = bytes.ToInt16(pos);
-                    pos += 2;
-
-                    var num = bytes.ToInt16(pos);
-                    pos += 2;
-                    Colors = new List<GradationColor>();
-
-                    List<Int32> positions = null;
-                    if (num > 2)
+                    using (var reader = new HwpReader(bytes))
                     {
-                        positions = new List<Int32>();
+
+                        GradationType type;
+                        Type = Enum.TryParse($"{reader.ReadInt16()}", out type) ? type : GradationType.None;
+
+                        Degree = reader.ReadInt16();
+
+                        CenterX = reader.ReadInt16();
+
+                        CenterY = reader.ReadInt16();
+
+                        Blur = reader.ReadInt16();
+
+                        var num = reader.ReadInt16();
+                        Colors = new List<GradationColor>();
+
+                        List<Int32> positions = null;
+                        if (num > 2)
+                        {
+                            positions = new List<Int32>();
+                            for (var i = 0; i < num; i++)
+                            {
+                                positions.Add(reader.ReadInt32());
+                            }
+                        }
+
                         for (var i = 0; i < num; i++)
                         {
-                            positions.Add(bytes.ToInt32(pos));
-                            pos += 4;
+                            Colors.Add(new GradationColor(positions?[i], reader.ReadColor()));
                         }
-                    }
-
-                    for (var i = 0; i < num; i++)
-                    {
-                        Colors.Add(new GradationColor(positions?[i], bytes.ToColor(pos)));
-                        pos += 4;
                     }
                 }
 
@@ -452,7 +446,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
                 {
                     if (!Type.HasFlag(FillType.Solid))
                     {
-                        throw new HwpUnsupportedProperty();
+                        throw new HwpUnsupportedPropertyException();
                     }
                     return _solid;
                 }
@@ -465,7 +459,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
                 {
                     if (!Type.HasFlag(FillType.Gradation))
                     {
-                        throw new HwpUnsupportedProperty();
+                        throw new HwpUnsupportedPropertyException();
                     }
                     return _gradation;
                 }
@@ -478,7 +472,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
                 {
                     if (!Type.HasFlag(FillType.Image))
                     {
-                        throw new HwpUnsupportedProperty();
+                        throw new HwpUnsupportedPropertyException();
                     }
                     return _image;
                 }
@@ -500,28 +494,24 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
 
         public Diagonal DiagonalProperty { get; }
 
-        public BorderFill(uint level, byte[] bytes, DocumentInformation _ = null)
-            : base(BorderFillTagId, level, (uint) bytes.Length)
+        public BorderFill(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
+            : base(BorderFillTagId, level, (uint) bytes.Length, bytes)
         {
-            var pos = 0;
+            using(var reader = new HwpReader(bytes))
+            {
+                Property = new BorderProperty(reader.ReadUInt16());
 
-            Property = new BorderProperty(bytes.ToUInt16());
-            pos += 2;
+                var borderType = reader.ReadBytes(4);
+                var borderWeight = reader.ReadBytes(4);
+                var borderColor = new Color[4] { reader.ReadColor(), reader.ReadColor(), reader.ReadColor(), reader.ReadColor() };
 
-            Left = new Border(bytes[pos], bytes[pos + 1], bytes.ToColor(pos + 2));
-            pos += 6;
+                Left = new Border(borderType[0], borderWeight[0], borderColor[0]);
+                Right = new Border(borderType[1], borderWeight[1], borderColor[1]);
+                Top = new Border(borderType[2], borderWeight[2], borderColor[2]);
+                Bottom = new Border(borderType[3], borderWeight[3], borderColor[3]);
 
-            Right = new Border(bytes[pos], bytes[pos + 1], bytes.ToColor(pos + 2));
-            pos += 6;
-
-            Top = new Border(bytes[pos], bytes[pos + 1], bytes.ToColor(pos + 2));
-            pos += 6;
-
-            Bottom = new Border(bytes[pos], bytes[pos + 1], bytes.ToColor(pos + 2));
-            pos += 6;
-
-            DiagonalProperty = new Diagonal(bytes[pos], bytes[pos + 1], bytes[pos + 2]);
-            pos += 6;
+                DiagonalProperty = new Diagonal(reader.ReadByte(), reader.ReadByte(), reader.ReadColor());
+            }
         }
     }
 }

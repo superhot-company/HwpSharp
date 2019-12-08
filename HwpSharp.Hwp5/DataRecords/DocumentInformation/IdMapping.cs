@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using SuperHot.HwpSharp.Hwp5.HwpType;
-using SuperHot.HwpSharp.Common.HwpType;
+using SuperHot.HwpSharp.Common;
 
-namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
+namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
     public class IdMapping : DataRecord
     {
@@ -41,52 +40,55 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
 
         public int StyleCount => IdMappingCounts[14];
 
+        // Version >= 5.0.2.1
         public int MemoShapeCount
         {
             get
             {
                 if (IdMappingCounts.Length < 15)
                 {
-                    throw new NotSupportedException();
+                    throw new HwpUnsupportedPropertyException();
                 }
 
                 return IdMappingCounts[15];
             }
         }
 
+        // Version >= 5.0.3.2
         public int TrackChangeCount
         {
             get
             {
                 if (IdMappingCounts.Length < 16)
                 {
-                    throw new NotSupportedException();
+                    throw new HwpUnsupportedPropertyException();
                 }
 
                 return IdMappingCounts[16];
             }
         }
 
+        // Version >= 5.0.3.2
         public int TrackChangeUserCount
         {
             get
             {
                 if (IdMappingCounts.Length < 17)
                 {
-                    throw new NotSupportedException();
+                    throw new HwpUnsupportedPropertyException();
                 }
 
                 return IdMappingCounts[17];
             }
         }
 
-        public IdMapping(uint level, byte[] bytes, DocumentInformation _ = null)
-            : base(IdMappingsTagId, level, (uint) bytes.Length)
+        public IdMapping(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
+            : base(IdMappingsTagId, level, (uint) bytes.Length, bytes)
         {
             var mappings = new List<int>();
-            for (var pos = 0; pos < bytes.Length; pos += 4)
+            using(var reader = new HwpReader(bytes))
             {
-                mappings.Add(bytes.ToInt32(pos));
+                mappings.Add(reader.ReadInt32());
             }
             IdMappingCounts = mappings.ToArray();
         }

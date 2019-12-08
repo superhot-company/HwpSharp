@@ -1,4 +1,4 @@
-﻿namespace SuperHot.HwpSharp.Hwp5.DocumentHistory
+﻿namespace SuperHot.HwpSharp.Hwp5
 {
     public class DocumentHistory
     {

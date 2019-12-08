@@ -1,11 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using SuperHot.HwpSharp.Hwp5.BodyText;
 using OpenMcdf;
 using SuperHot.HwpSharp.Common;
-using SuperHot.HwpSharp.Hwp5.DoucmentOption;
-using SuperHot.HwpSharp.Hwp5.HwpType;
 
 namespace SuperHot.HwpSharp.Hwp5
 {
@@ -27,12 +24,12 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets a document information of this document.
         /// </summary>
-        public DocumentInformation.DocumentInformation DocumentInformation { get; private set; }
+        public DocumentInformation DocumentInformation { get; private set; }
 
         /// <summary>
         /// Gets a body text of this document.
         /// </summary>
-        public BodyText.BodyText BodyText { get; private set; }
+        public BodyText BodyText { get; private set; }
 
         /// <summary>
         /// Gets a summary information of this document.
@@ -43,7 +40,7 @@ namespace SuperHot.HwpSharp.Hwp5
             private set { throw new NotImplementedException(); }
         }
 
-        public BinaryData.BinaryData BinaryData
+        public BinaryData BinaryData
         {
             get
             {
@@ -103,7 +100,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets scripts
         /// </summary>
-        public Script.Script Script
+        public Script Script
         {
             get
             {
@@ -118,7 +115,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets XML Templates
         /// </summary>
-        public XmlTemplate.XmlTemplate XmlTemplate
+        public XmlTemplate XmlTemplate
         {
             get
             {
@@ -133,7 +130,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets a document history
         /// </summary>
-        public DocumentHistory.DocumentHistory DocumentHistory
+        public DocumentHistory DocumentHistory
         {
             get
             {
@@ -153,42 +150,74 @@ namespace SuperHot.HwpSharp.Hwp5
         private void Load(CompoundFile compoundFile)
         {
             FileHeader = LoadFileHeader(compoundFile);
-            DocumentInformation = LoadDocumentInformation(compoundFile);
-            BodyText = LoadBodyText(compoundFile);
+
+            if (FileHeader.PasswordEncrypted)
+            {
+                throw new HwpUnsupportedFormatException("Does not support a password encrypted document.");
+            }
+
+            DocumentInformation = LoadDocumentInformation(compoundFile, FileHeader);
+            BodyText = LoadBodyText(compoundFile, FileHeader, DocumentInformation);
         }
 
-        private BodyText.BodyText LoadBodyText(CompoundFile compoundFile)
+        private static BodyText LoadBodyText(CompoundFile compoundFile, FileHeader fileHeader, DocumentInformation docInfo)
         {
             CFStorage storage;
+            var bodyText = new BodyText(fileHeader, docInfo);
             try
             {
-                storage = compoundFile.RootStorage.GetStorage("BodyText");
+                storage = !fileHeader.Published ? compoundFile.RootStorage.GetStorage("BodyText") : compoundFile.RootStorage.GetStorage("ViewText");
+
+                for (var i = 0; i < docInfo.DocumentProperty.SectionCount; ++i)
+                {
+                    CFStream stream;
+                    byte[] data;
+                    try
+                    {
+                        stream = storage.GetStream($"Section{i}");
+                        data = stream.GetData();
+                    }
+                    catch (CFItemNotFound exception)
+                    {
+                        throw new HwpCorruptedBodyTextException("The document does not have some sections. File may be corrupted.", exception);
+                    }
+
+                    using(var reader = new HwpReader(data, fileHeader.Published, fileHeader.Compressed))
+                    {
+                        var section = new BodyText.Section(reader, fileHeader, docInfo);
+
+                        bodyText.Sections.Add(section);
+                    }
+                }
             }
             catch (CFItemNotFound exception)
             {
                 throw new HwpFileFormatException("Specified document does not have any BodyText fields.", exception);
             }
 
-            var bodyText = new BodyText.BodyText(storage, DocumentInformation);
-
             return bodyText;
         }
 
-        private DocumentInformation.DocumentInformation LoadDocumentInformation(CompoundFile compoundFile)
+        private static DocumentInformation LoadDocumentInformation(CompoundFile compoundFile, FileHeader fileHeader)
         {
             CFStream stream;
+            byte[] data;
             try
             {
                 stream = compoundFile.RootStorage.GetStream("DocInfo");
+                data = stream.GetData();
             }
             catch (CFItemNotFound exception)
             {
                 throw new HwpFileFormatException("Specified document does not have a DocInfo field.", exception);
             }
 
-            var docInfo = new DocumentInformation.DocumentInformation(stream, FileHeader);
+            using (var reader = new HwpReader(data, compressed: fileHeader.Compressed))
+            {
+                var docInfo = new DocumentInformation(reader, fileHeader);
 
-            return docInfo;
+                return docInfo;
+            }
         }
 
         private static FileHeader LoadFileHeader(CompoundFile compoundFile)
@@ -263,34 +292,6 @@ namespace SuperHot.HwpSharp.Hwp5
             {
                 throw new HwpFileFormatException("Specified document is not a hwp 5 document format.", exception);
             }
-        }
-
-        internal static byte[] GetRawBytesFromStream(CFStream stream, FileHeader fileHeader)
-        {
-            var streamBytes = stream.GetData();
-
-            if (fileHeader.PasswordEncrypted)
-            {
-                throw new HwpUnsupportedFormatException("Does not support a password encrypted document.");
-            }
-
-            if (fileHeader.Compressed)
-            {
-                using (var dataStream = new MemoryStream(streamBytes, false))
-                {
-                    using (var zipStream = new DeflateStream(dataStream, CompressionMode.Decompress))
-                    {
-                        using (var decStream = new MemoryStream())
-                        {
-                            zipStream.CopyTo(decStream);
-
-                            streamBytes = decStream.ToArray();
-                        }
-                    }
-                }
-            }
-
-            return streamBytes;
         }
     }
 }

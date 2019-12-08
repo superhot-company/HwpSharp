@@ -1,4 +1,4 @@
-﻿namespace SuperHot.HwpSharp.Hwp5.XmlTemplate
+﻿namespace SuperHot.HwpSharp.Hwp5
 {
     public class XmlTemplate
     {

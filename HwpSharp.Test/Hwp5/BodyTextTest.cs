@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using SuperHot.HwpSharp.Hwp5;
-using SuperHot.HwpSharp.Hwp5.BodyText.DataRecords;
-using SuperHot.HwpSharp.Hwp5.HwpType;
+using SuperHot.HwpSharp.Hwp5.DataRecords;
 using Xunit;
 
 namespace SuperHot.HwpSharp.Test.Hwp5
@@ -37,9 +33,9 @@ namespace SuperHot.HwpSharp.Test.Hwp5
 
             var paragraph =
                 document.BodyText.Sections[0].DataRecords.Where(
-                    record => record.TagId == ParagraphText.ParagraphTextTagId)
+                    record => record.TagId == (uint)TagEnum.ParagraphText)
                     .Cast<ParagraphText>()
-                    .Aggregate("", (x, y) => x + y?.Text);
+                    .Aggregate("", (x, y) => x + y?.Text.Aggregate("", (a, b) => a + b.Text));
             Assert.Equal(expectedBodyText, paragraph);
         }
     }

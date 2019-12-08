@@ -2,10 +2,8 @@
 using System.Diagnostics;
 using System.Text;
 using SuperHot.HwpSharp.Common;
-using SuperHot.HwpSharp.Hwp5.HwpType;
-using SuperHot.HwpSharp.Common.HwpType;
 
-namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
+namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
     public class BinData : DataRecord
     {
@@ -14,7 +12,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
         public enum TypeProperty : byte
         {
             Link = 0,
-            Enbedding = 1,
+            Embedding = 1,
             Storage = 2,
         }
 
@@ -63,11 +61,9 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
                 State = state;
             }
 
-            public static implicit operator UInt16(BinDataProperty binData)
+            public static implicit operator ushort(BinDataProperty binData)
             {
-                return
-                    (UInt16)
-                        (((ushort) binData.State << 8) + ((ushort) binData.Compression << 4) + (ushort) binData.Type);
+                return (ushort)(((ushort)binData.State << 8) + ((ushort)binData.Compression << 4) + (ushort)binData.Type);
             }
         }
 
@@ -80,7 +76,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (Property.Type != TypeProperty.Link)
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _linkFileAbsolutePath;
             }
@@ -93,7 +89,7 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
             {
                 if (Property.Type != TypeProperty.Link)
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _linkFileRelativePath;
             }
@@ -104,9 +100,9 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
         {
             get
             {
-                if (Property.Type != TypeProperty.Enbedding && Property.Type != TypeProperty.Storage)
+                if (Property.Type != TypeProperty.Embedding && Property.Type != TypeProperty.Storage)
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _binaryDataId;
             }
@@ -117,49 +113,43 @@ namespace SuperHot.HwpSharp.Hwp5.DocumentInformation.DataRecords
         {
             get
             {
-                if (Property.Type != TypeProperty.Enbedding)
+                if (Property.Type != TypeProperty.Embedding)
                 {
-                    throw new HwpUnsupportedProperty();
+                    throw new HwpUnsupportedPropertyException();
                 }
                 return _binaryDataExtension;
             }
         }
 
-        public BinData(uint level, byte[] bytes, DocumentInformation _ = null)
-            : base(BinDataTagId, level, (uint) bytes.Length)
+        public BinData(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
+            : base(BinDataTagId, level, (uint) bytes.Length, bytes)
         {
-            var pos = 0;
-            Property = new BinDataProperty(bytes.ToUInt16());
-            pos += 2;
-
-            if (Property.Type == TypeProperty.Link)
+            using(var reader = new HwpReader(bytes))
             {
-                var absolutePathLenth = bytes.ToWord(pos);
-                pos += 2;
+                Property = new BinDataProperty(reader.ReadUInt16());
 
-                _linkFileAbsolutePath = Encoding.Unicode.GetString(bytes, pos, 2*absolutePathLenth);
-                pos += 2*absolutePathLenth;
+                // Type = LINK
+                if (Property.Type == TypeProperty.Link)
+                {
+                    var absolutePathLength = reader.ReadUInt16();
+                    _linkFileAbsolutePath = reader.ReadString(absolutePathLength);
 
-                var relativePathLength = bytes.ToWord(pos);
-                pos += 2;
+                    var relativePathLength = reader.ReadUInt16();
+                    _linkFileRelativePath = reader.ReadString(relativePathLength);
+                }
 
-                _linkFileRelativePath = Encoding.Unicode.GetString(bytes, pos, 2*relativePathLength);
-                pos += 2*relativePathLength;
-            }
+                // Type = EMBEDDING or STORAGE
+                if (Property.Type == TypeProperty.Embedding || Property.Type == TypeProperty.Storage)
+                {
+                    _binaryDataId = reader.ReadUInt16();
+                }
 
-            if (Property.Type == TypeProperty.Enbedding || Property.Type == TypeProperty.Storage)
-            {
-                _binaryDataId = bytes.ToUInt16(pos);
-                pos += 2;
-            }
-
-            if (Property.Type == TypeProperty.Enbedding)
-            {
-                var extensionLength = bytes.ToWord(pos);
-                pos += 2;
-
-                _binaryDataExtension = Encoding.Unicode.GetString(bytes, pos, 2*extensionLength);
-                pos += 2*extensionLength;
+                // Type = EMBEDDING
+                if (Property.Type == TypeProperty.Embedding)
+                {
+                    var binaryDataExtensionLength = reader.ReadUInt16();
+                    _binaryDataExtension = reader.ReadString(binaryDataExtensionLength);
+                }
             }
         }
     }

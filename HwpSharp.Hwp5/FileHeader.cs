@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using SuperHot.HwpSharp.Common;
-using SuperHot.HwpSharp.Hwp5.HwpType;
 
 namespace SuperHot.HwpSharp.Hwp5
 {

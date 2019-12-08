@@ -1,4 +1,4 @@
-﻿namespace SuperHot.HwpSharp.Hwp5.Script
+﻿namespace SuperHot.HwpSharp.Hwp5
 {
     public class Script
     {
