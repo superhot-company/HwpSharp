@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 using OpenMcdf;
 using SuperHot.HwpSharp.Common;
@@ -105,7 +104,7 @@ namespace SuperHot.HwpSharp.Hwp5
         {
             FileHeader = LoadFileHeader(compoundFile);
 
-            if (FileHeader.PasswordEncrypted)
+            if (FileHeader.EncryptedByPassword)
             {
                 throw new HwpUnsupportedFormatException("Does not support a password encrypted document.");
             }
@@ -135,7 +134,8 @@ namespace SuperHot.HwpSharp.Hwp5
                 storage.VisitEntries(item =>
                 {
                     var data = (item as CFStream).GetData();
-                    using (var reader = new HwpReader(data, fileHeader.Published, fileHeader.Compressed))
+
+                    using (var reader = new HwpReader(data, fileHeader.Distributed, fileHeader.Compressed))
                     {
                         docHistory.Streams[item.Name] = reader.ReadBytes((int)reader.BaseStream.Length);
                     }
@@ -187,7 +187,7 @@ namespace SuperHot.HwpSharp.Hwp5
                 storage.VisitEntries(item =>
                 {
                     var data = (item as CFStream).GetData();
-                    using (var reader = new HwpReader(data, fileHeader.Published, false))
+                    using (var reader = new HwpReader(data, fileHeader.Distributed, false))
                     {
                         script.Streams[item.Name] = reader.ReadBytes((int)reader.BaseStream.Length);
                     }
@@ -306,7 +306,7 @@ namespace SuperHot.HwpSharp.Hwp5
             var bodyText = new BodyText(fileHeader, docInfo);
             try
             {
-                var storage = !fileHeader.Published ? compoundFile.RootStorage.GetStorage("BodyText") : compoundFile.RootStorage.GetStorage("ViewText");
+                var storage = !fileHeader.Distributed ? compoundFile.RootStorage.GetStorage("BodyText") : compoundFile.RootStorage.GetStorage("ViewText");
 
                 for (var i = 0; i < docInfo.DocumentProperty.SectionCount; ++i)
                 {
@@ -321,7 +321,7 @@ namespace SuperHot.HwpSharp.Hwp5
                         throw new HwpCorruptedBodyTextException("The document does not have some sections. File may be corrupted.", exception);
                     }
 
-                    using(var reader = new HwpReader(data, fileHeader.Published, fileHeader.Compressed))
+                    using(var reader = new HwpReader(data, fileHeader.Distributed, fileHeader.Compressed))
                     {
                         var section = new BodyText.Section(reader, fileHeader, docInfo);
 

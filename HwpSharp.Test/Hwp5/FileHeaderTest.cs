@@ -46,10 +46,10 @@ namespace SuperHot.HwpSharp.Test.Hwp5
             var document = new Document(filename);
 
             Assert.Equal(compressed, document.FileHeader.Compressed);
-            Assert.Equal(encrypted, document.FileHeader.PasswordEncrypted);
-            Assert.Equal(distribute, document.FileHeader.Published);
-            Assert.Equal(ccl, document.FileHeader.CclDocumented);
-            Assert.Equal(trackchange, document.FileHeader.TrackChange);
+            Assert.Equal(encrypted, document.FileHeader.EncryptedByPassword);
+            Assert.Equal(distribute, document.FileHeader.Distributed);
+            Assert.Equal(ccl, document.FileHeader.HasCcl);
+            Assert.Equal(trackchange, document.FileHeader.TrackingChange);
         }
     }
 }

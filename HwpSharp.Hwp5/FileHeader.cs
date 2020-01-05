@@ -46,7 +46,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets the encryption attribute.
         /// </summary>
-        public bool PasswordEncrypted
+        public bool EncryptedByPassword
         {
             get
             {
@@ -61,7 +61,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets the published document attribute.
         /// </summary>
-        public bool Published
+        public bool Distributed
         {
             get
             {
@@ -91,7 +91,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets the DRM secure attribute.
         /// </summary>
-        public bool DrmSecured
+        public bool SecuredByDrm
         {
             get
             {
@@ -136,7 +136,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets whether the document has a digital sign.
         /// </summary>
-        public bool HasSign
+        public bool HasSignature
         {
             get
             {
@@ -151,7 +151,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets the certificate encryption attribute.
         /// </summary>
-        public bool CertificateEncrypted
+        public bool EncryptedByCertification
         {
             get
             {
@@ -166,7 +166,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets whether the additional certificate is stored.
         /// </summary>
-        public bool CertificateReserved
+        public bool HasReservedSignature
         {
             get
             {
@@ -196,7 +196,7 @@ namespace SuperHot.HwpSharp.Hwp5
         /// <summary>
         /// Gets or sets the CCL document attribute.
         /// </summary>
-        public bool CclDocumented
+        public bool HasCcl
         {
             get
             {
@@ -232,7 +232,7 @@ namespace SuperHot.HwpSharp.Hwp5
             }
         }
 
-        public bool TrackChange
+        public bool TrackingChange
         {
             get
             {
@@ -244,7 +244,7 @@ namespace SuperHot.HwpSharp.Hwp5
             }
         }
 
-        public bool KoglDocument
+        public bool KoglDocumented
         {
             get
             {

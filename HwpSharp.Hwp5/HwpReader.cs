@@ -14,7 +14,8 @@ namespace SuperHot.HwpSharp.Hwp5
         {
         }
 
-        public HwpReader(byte[] bytes, bool distributed = false, bool compressed = false) : base(new MemoryStream(DecodeBytes(bytes, distributed, compressed), false), Encoding.Unicode, false)
+        public HwpReader(byte[] bytes, bool distributed = false, bool compressed = false)
+            : base(new MemoryStream(DecodeBytes(bytes, distributed, compressed), false), Encoding.Unicode, false)
         {
         }
 

@@ -14,7 +14,7 @@ namespace SuperHot.HwpSharp.Test.Hwp5
         {
             var document = new Document(filename);
             Assert.Equal(version, document.FileHeader.FileVersion.ToString());
-            Assert.Equal(true, document.FileHeader.Published);
+            Assert.Equal(true, document.FileHeader.Distributed);
         }
     }
 }
