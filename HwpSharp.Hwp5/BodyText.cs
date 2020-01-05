@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using SuperHot.HwpSharp.Common;
-using OpenMcdf;
-
 namespace SuperHot.HwpSharp.Hwp5
 {
     /// <summary>

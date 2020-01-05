@@ -7,7 +7,7 @@ namespace SuperHot.HwpSharp.Hwp5
     /// <summary>
     /// Represents a hwp 5.0 document information.
     /// </summary>
-    public class DocumentInformation : IDocumentInformation
+    public class DocumentInformation
     {
         private readonly FileHeader _fileHeader;
 

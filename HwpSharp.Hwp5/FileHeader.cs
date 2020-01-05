@@ -7,7 +7,7 @@ namespace SuperHot.HwpSharp.Hwp5
     /// <summary>
     /// Represents a hwp 5.0 file header.
     /// </summary>
-    public class FileHeader : IFileHeader
+    public class FileHeader
     {
         public const int FIleHeaderLength = 256;
 

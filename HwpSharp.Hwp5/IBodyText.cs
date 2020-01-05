@@ -1,4 +1,4 @@
-﻿namespace SuperHot.HwpSharp.Common
+﻿namespace SuperHot.HwpSharp
 {
     /// <summary>
     /// Represents a body text.
