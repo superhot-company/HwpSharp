@@ -339,12 +339,12 @@ namespace SuperHot.HwpSharp.Hwp5
             FileVersion = new Version(5, 0, 0, 0);
         }
 
-        public FileHeader(HwpReader stream)
+        public FileHeader(HwpStreamReader stream)
         {
             SetFileHeader(stream);
         }
 
-        private void SetFileHeader(HwpReader stream)
+        private void SetFileHeader(HwpStreamReader stream)
         {
             ParseSignature(stream);
             ParseFileVersion(stream);
@@ -354,28 +354,28 @@ namespace SuperHot.HwpSharp.Hwp5
             ParseReservedBytes(stream);
         }
 
-        private void ParseReservedBytes(HwpReader stream)
+        private void ParseReservedBytes(HwpStreamReader stream)
         {
             ReservedBytes = stream.ReadBytes(207);
         }
 
-        private void ParseKoglLicenseCountry(HwpReader stream)
+        private void ParseKoglLicenseCountry(HwpStreamReader stream)
         {
             KoglLicenseCountry = stream.ReadByte();
         }
 
-        private void ParseEncryptVersion(HwpReader stream)
+        private void ParseEncryptVersion(HwpStreamReader stream)
         {
             EncryptVersion = stream.ReadUInt32();
         }
 
-        private void ParseAttribute(HwpReader stream)
+        private void ParseAttribute(HwpStreamReader stream)
         {
             _attribute = stream.ReadUInt32();
             _attribute2 = stream.ReadUInt32();
         }
 
-        private void ParseFileVersion(HwpReader stream)
+        private void ParseFileVersion(HwpStreamReader stream)
         {
             var versionBytes = stream.ReadBytes(4);
 
@@ -387,7 +387,7 @@ namespace SuperHot.HwpSharp.Hwp5
             }
         }
 
-        private static void ParseSignature(HwpReader stream)
+        private static void ParseSignature(HwpStreamReader stream)
         {
             var signature = stream.ReadBytes(SignatureLength);
 

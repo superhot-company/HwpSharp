@@ -5,24 +5,28 @@ using SuperHot.HwpSharp.Hwp5.DataRecords;
 
 namespace SuperHot.HwpSharp.Hwp5
 {
-    public class Section : ISection
+    public class ViewTextSection : ISection, IDistribution
     {
         private readonly FileHeader _fileHeader;
         private readonly DocumentInformation _docInfo;
 
         public List<DataRecord> DataRecords { get; }
 
-        public Section(FileHeader fileHeader, DocumentInformation docInfo)
+        public DistributeDocData DistributeDocData { get; set; }
+
+        public ViewTextSection(DistributeDocData distributeDocData, FileHeader fileHeader, DocumentInformation docInfo)
         {
             _fileHeader = fileHeader;
             _docInfo = docInfo;
+            DistributeDocData = distributeDocData;
             DataRecords = new List<DataRecord>();
         }
 
-        public Section(HwpStreamReader reader, FileHeader fileHeader, DocumentInformation docInfo)
+        public ViewTextSection(HwpStreamReader reader, DistributeDocData distributeDocData, FileHeader fileHeader, DocumentInformation docInfo)
         {
             _fileHeader = fileHeader;
             _docInfo = docInfo;
+            DistributeDocData = distributeDocData;
             DataRecords = new List<DataRecord>();
             while (true)
             {

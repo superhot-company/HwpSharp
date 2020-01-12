@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using SuperHot.HwpSharp.Common;
 using SuperHot.HwpSharp.Hwp5.DataRecords;
 
@@ -29,19 +30,19 @@ namespace SuperHot.HwpSharp.Hwp5
             DataRecords = new List<DataRecord>();
         }
 
-        public DocumentInformation(HwpReader reader, FileHeader fileHeader)
+        public DocumentInformation(HwpStreamReader reader, FileHeader fileHeader)
         {
             _fileHeader = fileHeader;
             DataRecords = new List<DataRecord>();
             BinDataList = new List<BinData>();
 
-            using(var recordReader = new HwpDataRecordReader(reader, fileHeader))
+            while (true)
             {
-                while(!recordReader.IsEndOfStream())
+                try
                 {
-                    var record = recordReader.ReadDataRecord();
+                    var record = reader.ReadDataRecord();
 
-                    switch(record.TagId)
+                    switch (record.TagId)
                     {
                         case (uint)TagEnum.DocumentProperties:
                             {
@@ -75,6 +76,10 @@ namespace SuperHot.HwpSharp.Hwp5
                     }
 
                     DataRecords.Add(record);
+                }
+                catch (EndOfStreamException)
+                {
+                    break;
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace SuperHot.HwpSharp.Hwp5.DataRecords
 {
@@ -30,7 +31,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
         public ParagraphHeader(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation docInfo = null)
             : base(ParagraphHeaderTagId, level, (uint) bytes.Length, bytes)
         {
-            using(var reader = new HwpReader(bytes))
+            using(var reader = new HwpStreamReader(bytes))
             {
                 Length = reader.ReadUInt32();
                 if ((Length & 0x80000000u) != 0)
@@ -55,9 +56,13 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
 
                 ParagraphId = reader.ReadUInt32();
 
-                if (!reader.IsEndOfStream())
+                try
                 {
                     HistoryMergeParagraphFlag = reader.ReadUInt16();
+                }
+                catch (EndOfStreamException)
+                {
+                    // Do Nothing
                 }
             }
         }

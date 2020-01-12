@@ -4,7 +4,7 @@ namespace SuperHot.HwpSharp.Hwp5
     /// <summary>
     /// Represents a hwp 5.0 body text.
     /// </summary>
-    public partial class BodyText : IBodyText
+    public class BodyText : IBodyText<Section>
     {
         private readonly FileHeader _fileHeader;
 

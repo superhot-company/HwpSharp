@@ -124,7 +124,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
         public BinData(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
             : base(BinDataTagId, level, (uint) bytes.Length, bytes)
         {
-            using(var reader = new HwpReader(bytes))
+            using(var reader = new HwpStreamReader(bytes))
             {
                 Property = new BinDataProperty(reader.ReadUInt16());
 

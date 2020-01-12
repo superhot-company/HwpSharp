@@ -16,6 +16,8 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
 
             {ParagraphHeader.ParagraphHeaderTagId, typeof (ParagraphHeader)},
             {ParagraphText.ParagraphTextTagId, typeof (ParagraphText)},
+
+            {DistributeDocData.DistributeDocDataTagId, typeof(DistributeDocData)},
         };
 
         public static void RegisterType(uint tagId, Type type)
@@ -52,6 +54,27 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
                 throw new HwpDataRecordConstructorException();
             }
             return ctor.Invoke(new object[] { level, data, fileHeader, docInfo }) as DataRecord;
+        }
+
+        public static (uint, uint, uint, bool) ParseHeader(byte byte0, byte byte1, byte byte2, byte byte3)
+        {
+            uint header = byte0 + byte1 * 0x100u + byte2 * 0x10000u + byte3 * 0x1000000u;
+            return ParseHeader(header);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="header"></param>
+        /// <returns>(tagId, level, size, needAdditionalByte)</returns>
+        public static (uint, uint, uint, bool) ParseHeader(uint header)
+        {
+            uint tagId = header & 0x3FF;
+            uint level = (header >> 10) & 0x3FF;
+            uint size = header >> 20;
+            var needAdditionalByte = size == 0xFFF;
+
+            return (tagId, level, size, needAdditionalByte);
         }
     }
 }

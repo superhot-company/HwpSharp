@@ -25,7 +25,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
                 throw new HwpCorruptedDataRecordException("The length of DocumentProperty is not 26.");
             }
 
-            using(var reader = new HwpReader(bytes))
+            using(var reader = new HwpStreamReader(bytes))
             {
                 SectionCount = reader.ReadUInt16();
                 StartPageNumber = reader.ReadUInt16();

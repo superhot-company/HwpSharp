@@ -285,7 +285,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
         public FaceName(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
             : base(FaceNameTagId, level, (uint) bytes.Length, bytes)
         {
-            using (var reader = new HwpReader(bytes))
+            using (var reader = new HwpStreamReader(bytes))
             {
                 Property = Enum.TryParse($"{reader.ReadByte()}", out FontProperty property) ? property : FontProperty.Unknown;
 

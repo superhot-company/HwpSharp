@@ -86,7 +86,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
             : base(IdMappingsTagId, level, (uint) bytes.Length, bytes)
         {
             var mappings = new List<int>();
-            using(var reader = new HwpReader(bytes))
+            using(var reader = new HwpStreamReader(bytes))
             {
                 mappings.Add(reader.ReadInt32());
             }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using OpenMcdf;
 using SuperHot.HwpSharp.Common;
+using SuperHot.HwpSharp.Hwp5.DataRecords;
 
 namespace SuperHot.HwpSharp.Hwp5
 {
@@ -30,6 +31,11 @@ namespace SuperHot.HwpSharp.Hwp5
         /// Gets a body text of this document.
         /// </summary>
         public BodyText BodyText { get; private set; }
+
+        /// <summary>
+        /// Gets a body text of this document.
+        /// </summary>
+        public ViewText ViewText { get; private set; }
 
         /// <summary>
         /// Gets a summary information of this document.
@@ -111,6 +117,7 @@ namespace SuperHot.HwpSharp.Hwp5
 
             DocumentInformation = LoadDocumentInformation(compoundFile, FileHeader);
             BodyText = LoadBodyText(compoundFile, FileHeader, DocumentInformation);
+            ViewText = LoadViewText(compoundFile, FileHeader, DocumentInformation);
             BinaryData = LoadBinaryData(compoundFile, FileHeader, DocumentInformation);
             PreviewText = LoadPreviewText(compoundFile);
             PreviewImage = LoadPreviewImage(compoundFile);
@@ -135,9 +142,13 @@ namespace SuperHot.HwpSharp.Hwp5
                 {
                     var data = (item as CFStream).GetData();
 
-                    using (var reader = new HwpReader(data, fileHeader.Distributed, fileHeader.Compressed))
+                    using (var reader = new HwpStreamReader(data, fileHeader.Distributed, fileHeader.Compressed))
                     {
-                        docHistory.Streams[item.Name] = reader.ReadBytes((int)reader.BaseStream.Length);
+                        using(var stream = new MemoryStream())
+                        {
+                            reader.BaseStream.CopyTo(stream);
+                            docHistory.Streams[item.Name] = stream.ToArray();
+                        }
                     }
                 }, false);
             }
@@ -187,9 +198,13 @@ namespace SuperHot.HwpSharp.Hwp5
                 storage.VisitEntries(item =>
                 {
                     var data = (item as CFStream).GetData();
-                    using (var reader = new HwpReader(data, fileHeader.Distributed, false))
+                    using (var reader = new HwpStreamReader(data, fileHeader.Distributed, false))
                     {
-                        script.Streams[item.Name] = reader.ReadBytes((int)reader.BaseStream.Length);
+                        using(var stream = new MemoryStream())
+                        {
+                            reader.BaseStream.CopyTo(stream);
+                            script.Streams[item.Name] = stream.ToArray();
+                        }
                     }
                 }, false);
             }
@@ -257,45 +272,41 @@ namespace SuperHot.HwpSharp.Hwp5
 
         private static BinaryData LoadBinaryData(CompoundFile compoundFile, FileHeader fileHeader, DocumentInformation docInfo)
         {
-            var binData = new BinaryData(fileHeader, docInfo);
-            try
+            var storage = compoundFile.RootStorage.TryGetStorage("BinData");
+            if (storage == null)
             {
-                var storage = compoundFile.RootStorage.TryGetStorage("BinData");
-                if (storage == null)
-                {
-                    return null;
-                }
+                return null;
+            }
 
-                foreach(var record in docInfo.BinDataList)
+            var binData = new BinaryData(fileHeader, docInfo);
+            foreach (var record in docInfo.BinDataList)
+            {
+                if (record.Property.Type == DataRecords.BinData.TypeProperty.Embedding || record.Property.Type == DataRecords.BinData.TypeProperty.Storage)
                 {
-                    if (record.Property.Type == DataRecords.BinData.TypeProperty.Embedding || record.Property.Type == DataRecords.BinData.TypeProperty.Storage)
+                    var id = record.BinaryDataId;
+
+                    byte[] data;
+                    try
                     {
-                        var id = record.BinaryDataId;
+                        // BIN0001.bmp
+                        var stream = storage.GetStream(string.Format("BIN{0,4:X4}.", id) + record.BinaryDataExtension);
+                        data = stream.GetData();
+                    }
+                    catch (CFItemNotFound exception)
+                    {
+                        throw new HwpCorruptedBodyTextException("The document does not have some binary data. File may be corrupted.", exception);
+                    }
 
-                        byte[] data;
-                        try
+                    var compressed = record.Property.Compression == DataRecords.BinData.CompressionProperty.StorageDefault ? fileHeader.Compressed : record.Property.Compression == DataRecords.BinData.CompressionProperty.Compress ? true : record.Property.Compression == DataRecords.BinData.CompressionProperty.NotCompress ? false : throw new HwpCorruptedDataRecordException();
+                    using(var reader = new HwpStreamReader(data, compressed: compressed))
+                    {
+                        using(var stream = new MemoryStream())
                         {
-                            // BIN0001.bmp
-                            var stream = storage.GetStream(string.Format("BIN{0,4:X4}.", id) + record.BinaryDataExtension);
-                            data = stream.GetData();
-                        }
-                        catch (CFItemNotFound exception)
-                        {
-                            throw new HwpCorruptedBodyTextException("The document does not have some binary data. File may be corrupted.", exception);
-                        }
-
-                        var compressed = record.Property.Compression == DataRecords.BinData.CompressionProperty.StorageDefault ? fileHeader.Compressed : record.Property.Compression == DataRecords.BinData.CompressionProperty.Compress ? true : record.Property.Compression == DataRecords.BinData.CompressionProperty.NotCompress ? false : throw new HwpCorruptedDataRecordException();
-                        using(var reader = new HwpReader(data, compressed: compressed))
-                        {
-                            var bytes = reader.ReadBytes((int)reader.BaseStream.Length);
-                            binData.Data[id] = bytes;
+                            reader.BaseStream.CopyTo(stream);
+                            binData.Data[id] = stream.ToArray();
                         }
                     }
                 }
-            }
-            catch (CFItemNotFound exception)
-            {
-                throw new HwpFileFormatException("Specified document does not have any BinData storage.", exception);
             }
 
             return binData;
@@ -306,7 +317,7 @@ namespace SuperHot.HwpSharp.Hwp5
             var bodyText = new BodyText(fileHeader, docInfo);
             try
             {
-                var storage = !fileHeader.Distributed ? compoundFile.RootStorage.GetStorage("BodyText") : compoundFile.RootStorage.GetStorage("ViewText");
+                var storage = compoundFile.RootStorage.GetStorage("BodyText");
 
                 for (var i = 0; i < docInfo.DocumentProperty.SectionCount; ++i)
                 {
@@ -321,9 +332,9 @@ namespace SuperHot.HwpSharp.Hwp5
                         throw new HwpCorruptedBodyTextException("The document does not have some sections. File may be corrupted.", exception);
                     }
 
-                    using(var reader = new HwpReader(data, fileHeader.Distributed, fileHeader.Compressed))
+                    using(var reader = new HwpStreamReader(data, false, fileHeader.Compressed, fileHeader, docInfo))
                     {
-                        var section = new BodyText.Section(reader, fileHeader, docInfo);
+                        var section = new Section(reader, fileHeader, docInfo);
 
                         bodyText.Sections.Add(section);
                     }
@@ -335,6 +346,62 @@ namespace SuperHot.HwpSharp.Hwp5
             }
 
             return bodyText;
+        }
+
+        private static ViewText LoadViewText(CompoundFile compoundFile, FileHeader fileHeader, DocumentInformation docInfo)
+        {
+            if (!fileHeader.Distributed)
+            {
+                return null;
+            }
+
+            var viewText = new ViewText(fileHeader, docInfo);
+            try
+            {
+                var storage = compoundFile.RootStorage.GetStorage("ViewText");
+
+                for (var i = 0; i < docInfo.DocumentProperty.SectionCount; ++i)
+                {
+                    byte[] data;
+                    try
+                    {
+                        var stream = storage.GetStream($"Section{i}");
+                        data = stream.GetData();
+                    }
+                    catch (CFItemNotFound exception)
+                    {
+                        throw new HwpCorruptedBodyTextException("The document does not have some sections. File may be corrupted.", exception);
+                    }
+
+                    var (tagId, level, size, flag) = DataRecordFactory.ParseHeader(data[0], data[1], data[2], data[3]);
+                    if (tagId != DistributeDocData.DistributeDocDataTagId)
+                    {
+                        throw new HwpCorruptedBodyTextException("The document does not have a HWPTAG_DISTRIBUTE_DOC_DATA record.");
+                    }
+
+                    if (size != DistributeDocData.DistributeDocDataLength)
+                    {
+                        throw new HwpCorruptedBodyTextException("The document has an invalid HWPTAG_DISTRIBUTE_DOC_DATA record.");
+                    }
+
+                    var distributeDocDataRecordBytes = new byte[256];
+                    Array.Copy(data, 4, distributeDocDataRecordBytes, 0, 256);
+                    var distributeDocDataRecord = new DistributeDocData(level, distributeDocDataRecordBytes);
+
+                    using (var reader = new HwpStreamReader(data, true, fileHeader.Compressed, fileHeader, docInfo))
+                    {
+                        var section = new ViewTextSection(reader, distributeDocDataRecord, fileHeader, docInfo);
+
+                        viewText.Sections.Add(section);
+                    }
+                }
+            }
+            catch (CFItemNotFound exception)
+            {
+                throw new HwpFileFormatException("Specified document does not have ViewText storage.", exception);
+            }
+
+            return viewText;
         }
 
         private static DocumentInformation LoadDocumentInformation(CompoundFile compoundFile, FileHeader fileHeader)
@@ -350,7 +417,7 @@ namespace SuperHot.HwpSharp.Hwp5
                 throw new HwpFileFormatException("Specified document does not have a DocInfo stream.", exception);
             }
 
-            using (var reader = new HwpReader(data, compressed: fileHeader.Compressed))
+            using (var reader = new HwpStreamReader(data, compressed: fileHeader.Compressed, fileHeader: fileHeader))
             {
                 var docInfo = new DocumentInformation(reader, fileHeader);
 
@@ -376,7 +443,7 @@ namespace SuperHot.HwpSharp.Hwp5
                 throw new HwpFileFormatException("The length of a file header is not 256.");
             }
 
-            using (var reader = new HwpReader(data)) {
+            using (var reader = new HwpStreamReader(data)) {
                 var fileHeader = new FileHeader(reader);
 
                 return fileHeader;

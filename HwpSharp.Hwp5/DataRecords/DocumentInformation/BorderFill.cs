@@ -312,7 +312,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
 
                 internal GradationFill(byte[] bytes)
                 {
-                    using (var reader = new HwpReader(bytes))
+                    using (var reader = new HwpStreamReader(bytes))
                     {
 
                         GradationType type;
@@ -497,7 +497,7 @@ namespace SuperHot.HwpSharp.Hwp5.DataRecords
         public BorderFill(uint level, byte[] bytes, FileHeader _ = null, DocumentInformation __ = null)
             : base(BorderFillTagId, level, (uint) bytes.Length, bytes)
         {
-            using(var reader = new HwpReader(bytes))
+            using(var reader = new HwpStreamReader(bytes))
             {
                 Property = new BorderProperty(reader.ReadUInt16());
 
