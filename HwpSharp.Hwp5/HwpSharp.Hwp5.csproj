@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>SuperHot.HwpSharp.Hwp5</RootNamespace>
     <AssemblyName>SuperHot.HwpSharp.Hwp5</AssemblyName>
     <Authors>SuperHot</Authors>
@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenMcdf" Version="2.2.1.3" />
+    <PackageReference Include="OpenMcdf" Version="2.2.1.9" />
   </ItemGroup>
 
   <ItemGroup>
